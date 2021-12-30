@@ -13,14 +13,15 @@ type ConsulConfig struct {
 }
 
 type Consul struct {
-	Config *ConsulConfig
+	Config              *ConsulConfig
+	Address, ConfigPath string
 }
 
 type Token struct {
 	Token string `yaml:"token"`
 }
 
-func (c *Consul) buildAddresConsul() string {
+func (c *Consul) buildAddressConsul() string {
 	return fmt.Sprintf("%s:%s", c.Config.HOST, c.Config.PORT)
 }
 
@@ -32,7 +33,7 @@ func (consul *Consul) GetConfig() []byte {
 	token := consul.getToken().Token
 	newConfig := apiConsul.DefaultConfig()
 	newConfig.Token = token
-	newConfig.Address = consul.buildAddresConsul()
+	newConfig.Address = consul.Address
 
 	client, err := apiConsul.NewClient(newConfig)
 	if err != nil {
@@ -48,11 +49,10 @@ func (consul *Consul) GetConfig() []byte {
 	params := apiConsul.QueryOptions{}
 	params.Token = token
 
-	path := consul.buildPathConfig()
-	pair, _, err := kv.Get(path, &params)
+	pair, _, err := kv.Get(consul.ConfigPath, &params)
 
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Error not valid path %s error %s", path, err))
+		log.Fatal(fmt.Sprintf("Error not valid path %s error %s", consul.ConfigPath, err))
 	}
 
 	return pair.Value
