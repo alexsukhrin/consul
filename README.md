@@ -23,19 +23,16 @@ func init() {
 }
 
 func main() {
-	consulConfig := new(c.ConsulConfig)
-	consulConfig.HOST = ConsulHost
-	consulConfig.PORT = ConsulPort
-	consulConfig.STAGE = Stage
-	consulConfig.SERVICE = ConsulService
-	consulConfig.PATH_TOKEN = PathToken
-
 	consul := new(c.Consul)
-	consul.Config = consulConfig
+	consul.HOST = ConsulHost
+	consul.PORT = ConsulPort
+	consul.STAGE = Stage
+	consul.SERVICE = ConsulService
+	consul.PATH_TOKEN = PathToken
 	consul.Address = consul.BuildAddressConsul()
 	consul.ConfigPath = consul.BuildPathConfig()
 	consul.Token = consul.GetToken()
-
+	
 	config := consul.GetConfig()
 	log.Printf("Config %s", config)
 }
