@@ -3,34 +3,42 @@ package consul
 import (
 	"fmt"
 	"github.com/goccy/go-yaml"
-	consul "github.com/hashicorp/consul/api"
+	apiConsul "github.com/hashicorp/consul/api"
 	"io/ioutil"
 	"log"
 )
 
-type Token struct {
-	Value string `yaml:"token"`
-}
-
 type ConsulConfig struct {
-	HOST, PORT, STAGE, SERVICE, PATH_CONFIG, TOKEN string
+	HOST, PORT, STAGE, SERVICE, PATH_TOKEN string
 }
 
-func BuildAddresConsul(host, port string) string {
-	return fmt.Sprintf("%s:%s", host, port)
+type Consul struct {
+	Config *ConsulConfig
 }
 
-func BuildPathConfig(stage, service string) string {
-	return fmt.Sprintf("DigitalCore/%s/%s/config", stage, service)
+type Token struct {
+	Token string `yaml:"token"`
 }
 
-func GetConfig(c *ConsulConfig) []byte {
-	newConfig := consul.DefaultConfig()
-	newConfig.Token = c.TOKEN
+func (c *Consul) buildAddresConsul() string {
+	return fmt.Sprintf("%s:%s", c.Config.HOST, c.Config.PORT)
+}
 
-	newConfig.Address = BuildAddresConsul(c.HOST, c.PORT)
-	client, err := consul.NewClient(newConfig)
+func (c *Consul) buildPathConfig() string {
+	return fmt.Sprintf("DigitalCore/%s/%s/config", c.Config.STAGE, c.Config.STAGE)
+}
 
+func (c *Consul) GetConfig(conf *ConsulConfig) []byte {
+	consul := new(Consul)
+	consul.Config = conf
+
+	token := consul.getToken().Token
+
+	newConfig := apiConsul.DefaultConfig()
+	newConfig.Token = token
+	newConfig.Address = consul.buildAddresConsul()
+
+	client, err := apiConsul.NewClient(newConfig)
 	if err != nil {
 		log.Fatal("Error not connect to consul")
 	}
@@ -41,20 +49,21 @@ func GetConfig(c *ConsulConfig) []byte {
 	kv := client.KV()
 
 	// Lookup the pair
-	params := consul.QueryOptions{}
-	params.Token = c.TOKEN
-
-	pair, _, err := kv.Get(c.PATH_CONFIG, &params)
+	params := apiConsul.QueryOptions{}
+	params.Token = token
+	
+	path := consul.buildPathConfig()
+	pair, _, err := kv.Get(path, &params)
 
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Error not valid path %s error %s", c.PATH_CONFIG, err))
+		log.Fatal(fmt.Sprintf("Error not valid path %s error %s", path, err))
 	}
 
 	return pair.Value
 }
 
-func getToken(path string) Token {
-	envToken, err := ioutil.ReadFile(path)
+func (c *Consul) getToken() Token {
+	envToken, err := ioutil.ReadFile(c.Config.PATH_TOKEN)
 	if err != nil {
 		log.Fatal(err)
 	}
