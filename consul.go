@@ -25,7 +25,7 @@ func (c *Consul) buildAddresConsul() string {
 }
 
 func (c *Consul) buildPathConfig() string {
-	return fmt.Sprintf("DigitalCore/%s/%s/config", c.Config.STAGE, c.Config.STAGE)
+	return fmt.Sprintf("DigitalCore/%s/%s/config", c.Config.STAGE, c.Config.SERVICE)
 }
 
 func (consul *Consul) GetConfig() []byte {
