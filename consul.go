@@ -14,25 +14,24 @@ type ConsulConfig struct {
 
 type Consul struct {
 	Config              *ConsulConfig
-	Address, ConfigPath string
+	Address, ConfigPath, Token string
 }
 
 type Token struct {
 	Token string `yaml:"token"`
 }
 
-func (c *Consul) buildAddressConsul() string {
+func (c *Consul) BuildAddressConsul() string {
 	return fmt.Sprintf("%s:%s", c.Config.HOST, c.Config.PORT)
 }
 
-func (c *Consul) buildPathConfig() string {
+func (c *Consul) BuildPathConfig() string {
 	return fmt.Sprintf("DigitalCore/%s/%s/config", c.Config.STAGE, c.Config.SERVICE)
 }
 
 func (consul *Consul) GetConfig() []byte {
-	token := consul.getToken().Token
 	newConfig := apiConsul.DefaultConfig()
-	newConfig.Token = token
+	newConfig.Token = consul.Token
 	newConfig.Address = consul.Address
 
 	client, err := apiConsul.NewClient(newConfig)
@@ -47,7 +46,7 @@ func (consul *Consul) GetConfig() []byte {
 
 	// Lookup the pair
 	params := apiConsul.QueryOptions{}
-	params.Token = token
+	params.Token = consul.Token
 
 	pair, _, err := kv.Get(consul.ConfigPath, &params)
 
@@ -58,7 +57,7 @@ func (consul *Consul) GetConfig() []byte {
 	return pair.Value
 }
 
-func (c *Consul) getToken() Token {
+func (c *Consul) GetToken() string {
 	envToken, err := ioutil.ReadFile(c.Config.PATH_TOKEN)
 	if err != nil {
 		log.Fatal(err)
@@ -71,5 +70,5 @@ func (c *Consul) getToken() Token {
 		log.Fatal(err)
 	}
 
-	return token
+	return token.Token
 }
