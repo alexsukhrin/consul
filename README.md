@@ -32,6 +32,9 @@ func main() {
 
 	consul := new(c.Consul)
 	consul.Config = consulConfig
+	consul.Address = consul.BuildAddressConsul()
+	consul.ConfigPath = consul.BuildPathConfig()
+	consul.Token = consul.GetToken()
 
 	config := consul.GetConfig()
 	log.Printf("Config %s", config)
