@@ -13,7 +13,7 @@ type ConsulConfig struct {
 }
 
 type Consul struct {
-	Config              *ConsulConfig
+	Config                     *ConsulConfig
 	Address, ConfigPath, Token string
 }
 
