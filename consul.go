@@ -28,12 +28,8 @@ func (c *Consul) buildPathConfig() string {
 	return fmt.Sprintf("DigitalCore/%s/%s/config", c.Config.STAGE, c.Config.STAGE)
 }
 
-func (c *Consul) GetConfig(conf *ConsulConfig) []byte {
-	consul := new(Consul)
-	consul.Config = conf
-
+func (consul *Consul) GetConfig() []byte {
 	token := consul.getToken().Token
-
 	newConfig := apiConsul.DefaultConfig()
 	newConfig.Token = token
 	newConfig.Address = consul.buildAddresConsul()
@@ -51,7 +47,7 @@ func (c *Consul) GetConfig(conf *ConsulConfig) []byte {
 	// Lookup the pair
 	params := apiConsul.QueryOptions{}
 	params.Token = token
-	
+
 	path := consul.buildPathConfig()
 	pair, _, err := kv.Get(path, &params)
 
