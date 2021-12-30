@@ -8,25 +8,20 @@ import (
 	"log"
 )
 
-type ConsulConfig struct {
-	HOST, PORT, STAGE, SERVICE, PATH_TOKEN string
-}
-
 type Consul struct {
-	Config                     *ConsulConfig
-	Address, ConfigPath, Token string
+	HOST, PORT, STAGE, SERVICE, PATH_TOKEN, Address, ConfigPath, Token string
 }
 
 type Token struct {
 	Token string `yaml:"token"`
 }
 
-func (c *Consul) BuildAddressConsul() string {
-	return fmt.Sprintf("%s:%s", c.Config.HOST, c.Config.PORT)
+func (consul *Consul) BuildAddressConsul() string {
+	return fmt.Sprintf("%s:%s", consul.HOST, consul.PORT)
 }
 
-func (c *Consul) BuildPathConfig() string {
-	return fmt.Sprintf("DigitalCore/%s/%s/config", c.Config.STAGE, c.Config.SERVICE)
+func (consul *Consul) BuildPathConfig() string {
+	return fmt.Sprintf("DigitalCore/%s/%s/config", consul.STAGE, consul.SERVICE)
 }
 
 func (consul *Consul) GetConfig() []byte {
@@ -57,8 +52,8 @@ func (consul *Consul) GetConfig() []byte {
 	return pair.Value
 }
 
-func (c *Consul) GetToken() string {
-	envToken, err := ioutil.ReadFile(c.Config.PATH_TOKEN)
+func (consul *Consul) GetToken() string {
+	envToken, err := ioutil.ReadFile(consul.PATH_TOKEN)
 	if err != nil {
 		log.Fatal(err)
 	}
