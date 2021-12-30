@@ -3,7 +3,7 @@ consul config
 
 ### Example
 
-`
+```
 package main
 
 import (
@@ -29,4 +29,4 @@ func main() {
 	log.Printf("Config %s", config)
 }
 
-`
+```
