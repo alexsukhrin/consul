@@ -9,25 +9,25 @@ import (
 )
 
 type Consul struct {
-	HOST, PORT, STAGE, SERVICE, PATH_TOKEN, Address, ConfigPath, Token string
+	Host, Port, Stage, ServiceName, TokenKey, ConfigAddress, ConfigPath, TokenPath string
 }
 
-type Token struct {
-	Token string `yaml:"token"`
+type token struct {
+	key string `yaml:"token"`
 }
 
-func (consul *Consul) BuildAddressConsul() string {
-	return fmt.Sprintf("%s:%s", consul.HOST, consul.PORT)
+func (consul *Consul) Address() string {
+	return fmt.Sprintf("%s:%s", consul.Host, consul.Port)
 }
 
-func (consul *Consul) BuildPathConfig() string {
-	return fmt.Sprintf("DigitalCore/%s/%s/config", consul.STAGE, consul.SERVICE)
+func (consul *Consul) Path() string {
+	return fmt.Sprintf("DigitalCore/%s/%s/config", consul.Stage, consul.ServiceName)
 }
 
-func (consul *Consul) GetConfig() []byte {
+func (consul *Consul) Config() []byte {
 	newConfig := apiConsul.DefaultConfig()
-	newConfig.Token = consul.Token
-	newConfig.Address = consul.Address
+	newConfig.Token = consul.TokenKey
+	newConfig.Address = consul.ConfigAddress
 
 	client, err := apiConsul.NewClient(newConfig)
 	if err != nil {
@@ -35,13 +35,10 @@ func (consul *Consul) GetConfig() []byte {
 	}
 
 	log.Println("Connect to consul successfully")
-
-	// Get a handle to the KV API
 	kv := client.KV()
 
-	// Lookup the pair
 	params := apiConsul.QueryOptions{}
-	params.Token = consul.Token
+	params.Token = consul.TokenKey
 
 	pair, _, err := kv.Get(consul.ConfigPath, &params)
 
@@ -52,18 +49,18 @@ func (consul *Consul) GetConfig() []byte {
 	return pair.Value
 }
 
-func (consul *Consul) GetToken() string {
-	envToken, err := ioutil.ReadFile(consul.PATH_TOKEN)
+func (consul *Consul) Token() string {
+	envToken, err := ioutil.ReadFile(consul.ConfigPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	token := Token{}
-	err = yaml.Unmarshal([]byte(envToken), &token)
+	t := token{}
+	err = yaml.Unmarshal([]byte(envToken), &t)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return token.Token
+	return t.key
 }
