@@ -1,9 +1,3 @@
-# consul
-consul config
-
-### Example
-
-```
 package consul
 
 import (
@@ -26,5 +20,3 @@ func TestConfig(t *testing.T) {
 	config := consul.Config()
 	t.Log(fmt.Sprintf("Config %s", config))
 }
-
-```

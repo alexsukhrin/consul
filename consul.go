@@ -12,8 +12,8 @@ type Consul struct {
 	Host, Port, Stage, ServiceName, TokenKey, ConfigAddress, ConfigPath, TokenPath string
 }
 
-type token struct {
-	key string `yaml:"token"`
+type TokenKey struct {
+	Token string `yaml:"token"`
 }
 
 func (consul *Consul) Address() string {
@@ -55,12 +55,12 @@ func (consul *Consul) Token() string {
 		log.Fatal(err)
 	}
 
-	t := token{}
-	err = yaml.Unmarshal([]byte(envToken), &t)
+	token := new(TokenKey)
+	err = yaml.Unmarshal([]byte(envToken), token)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return t.key
+	return token.Token
 }
