@@ -50,7 +50,7 @@ func (consul *Consul) Config() []byte {
 }
 
 func (consul *Consul) Token() string {
-	envToken, err := ioutil.ReadFile(consul.ConfigPath)
+	envToken, err := ioutil.ReadFile(consul.TokenPath)
 	if err != nil {
 		log.Fatal(err)
 	}
